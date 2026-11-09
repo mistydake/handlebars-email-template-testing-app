@@ -27,7 +27,7 @@ the result server-side and see it instantly, with line and column numbers when s
 
 ## Requirements
 
-- Java 11 or higher (`java -version`)
+- Java 11 or higher (`java -version`). The JavaScript engine used for helpers (Nashorn) is bundled, so newer Java versions such as 17 and 21 work too
 - Maven 3.6+ to build (`mvn -version`), or let GitHub Actions build the JAR for you
 
 ## Build

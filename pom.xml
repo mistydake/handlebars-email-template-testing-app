@@ -37,6 +37,13 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
+    <!-- Nashorn was removed from the JDK in Java 15. Handlebars.java needs it to run the
+         JavaScript helpers, so bundle the standalone version to work on Java 11, 17, 21+. -->
+    <dependency>
+      <groupId>org.openjdk.nashorn</groupId>
+      <artifactId>nashorn-core</artifactId>
+      <version>15.4</version>
+    </dependency>
   </dependencies>
 
   <build>
