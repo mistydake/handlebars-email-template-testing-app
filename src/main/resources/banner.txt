@@ -1,0 +1,5 @@
+
+ Handlebars Email Template Testing App  |  jknack Handlebars.java 4.2.0
+ Running at: http://localhost:${server.port}
+ Working directory: ${user.dir}
+

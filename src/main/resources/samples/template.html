@@ -1,0 +1,79 @@
+<!-- Sample template: an order receipt. Uses built-in helpers (dateFormat, lower, upper) and custom ones from customhandlebar.js. -->
+<style>
+  body { font-family: system-ui, sans-serif; color: #1d2330; margin: 0; padding: 28px; background: #f3f4f9; }
+  .card { max-width: 660px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 28px 32px; box-shadow: 0 2px 14px rgba(20,25,50,.09); }
+  h1 { margin: 0 0 4px; font-size: 22px; }
+  .muted { color: #6b7185; font-size: 13px; margin: 0; }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+  .badge.shipped { background: #dff6e9; color: #167a45; }
+  .badge.processing { background: #fff1d6; color: #9a6400; }
+  .cols { display: flex; gap: 32px; margin: 22px 0; }
+  .cols h3 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #6b7185; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #6b7185; padding: 8px 0; border-bottom: 2px solid #e6e8f0; }
+  td { padding: 10px 0; border-bottom: 1px solid #eef0f6; }
+  td small { display: block; color: #8a8fa3; font-size: 11px; }
+  .r { text-align: right; }
+  .totals td { border: 0; padding: 4px 0; }
+  .totals .grand td { font-weight: 700; font-size: 16px; padding-top: 10px; border-top: 2px solid #e6e8f0; }
+  .notes { margin-top: 20px; padding: 12px 16px; background: #f6f7fb; border-radius: 8px; font-size: 13px; }
+  .notes ul { margin: 6px 0 0; padding-left: 18px; }
+</style>
+
+<div class="card">
+  <h1>Order {{orderId}}</h1>
+  <p class="muted">
+    Placed {{dateFormat placedAt "MMM d, yyyy"}} &middot;
+    <span class="badge {{lower status}}">{{upper status}}</span>
+  </p>
+
+  <div class="cols">
+    <div>
+      <h3>Customer</h3>
+      {{customer.name}}<br>
+      <span class="muted">{{customer.email}}</span>
+    </div>
+    <div>
+      <h3>Ship to</h3>
+      {{#with shipping.address}}
+        {{line1}}<br>
+        {{city}}, {{region}} {{postal}}
+      {{/with}}
+      <br><span class="muted">{{shipping.method}}</span>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Item</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Total</th></tr>
+    {{#each items}}
+      <tr>
+        <td>{{name}}<small>{{sku}}</small></td>
+        <td class="r">{{quantity}}</td>
+        <td class="r">{{formatCurrency price ../currency}}</td>
+        <td class="r">{{formatCurrency (multiply price quantity) ../currency}}</td>
+      </tr>
+    {{/each}}
+  </table>
+
+  <table class="totals">
+    <tr><td class="muted">{{count items}} {{pluralize (count items) "item" "items"}}</td><td></td></tr>
+    <tr><td>Subtotal</td><td class="r">{{formatCurrency (sumLineTotals items) currency}}</td></tr>
+    <tr><td>Tax ({{percent taxRate}})</td><td class="r">{{formatCurrency (taxAmount items taxRate) currency}}</td></tr>
+    <tr class="grand"><td>Total</td><td class="r">{{formatCurrency (orderTotal items taxRate) currency}}</td></tr>
+  </table>
+
+  {{#ifEquals status "shipped"}}
+    <p class="muted" style="margin-top:18px">Your order is on its way.</p>
+  {{else}}
+    <p class="muted" style="margin-top:18px">We will email you when your order ships.</p>
+  {{/ifEquals}}
+
+  {{#if notes}}
+    <div class="notes">
+      <strong>Order notes</strong>
+      <ul>
+        {{#each notes}}<li>{{this}}</li>{{/each}}
+      </ul>
+    </div>
+  {{/if}}
+</div>

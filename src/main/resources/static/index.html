@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handlebars Email Template Testing App</title>
+
+<!-- CodeMirror 5 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/brace-fold.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/xml-fold.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/fold/foldgutter.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/json-lint.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/lint/lint.min.css">
+<!-- jsonlint for JSON error underlining -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsonlint/1.6.3/jsonlint.min.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#1a1a1e;--surface:#242428;--surface2:#2c2c32;--surface3:#34343c;
+  --border:rgba(255,255,255,0.07);--border-md:rgba(255,255,255,0.13);
+  --text:#e8e8e4;--text2:#a0a098;--text3:#686860;
+  --accent:#4f8ef7;--accent-light:rgba(79,142,247,0.15);--accent-border:rgba(79,142,247,0.3);
+  --green:#4ade80;--green-bg:rgba(74,222,128,0.1);--green-border:rgba(74,222,128,0.3);
+  --red:#f87171;--red-bg:rgba(248,113,113,0.1);--red-border:rgba(248,113,113,0.3);
+  --amber:#fbbf24;--amber-bg:rgba(251,191,36,0.1);--amber-border:rgba(251,191,36,0.3);
+  --radius:6px;--mono:'JetBrains Mono','Cascadia Code','Fira Mono','Courier New',monospace;
+}
+body { font-family: system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* HEADER */
+header { background:var(--surface); border-bottom:1px solid var(--border-md); padding:0 16px; height:50px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.logo { font-size:15px; font-weight:700; letter-spacing:-.02em; }
+.logo em { font-style:normal; color:var(--accent); }
+.badge { font-size:11px; padding:2px 8px; background:var(--accent-light); color:var(--accent); border:1px solid var(--accent-border); border-radius:20px; font-weight:500; }
+.hdr-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+#hdr-status { font-size:12px; color:var(--text3); }
+#hdr-status.ok { color:var(--green); }
+#hdr-status.err { color:var(--red); }
+
+/* BUTTONS */
+.btn { font-family:inherit; font-size:12px; font-weight:500; padding:6px 14px; border-radius:var(--radius); border:1px solid var(--border-md); background:var(--surface2); color:var(--text); cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; transition:background .1s; }
+.btn:hover { background:var(--surface3); }
+.btn-primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+.btn-primary:hover { opacity:.9; }
+.btn-primary:disabled { opacity:.4; cursor:not-allowed; }
+.btn-sm { font-size:11px; padding:4px 10px; }
+
+/* LAYOUT */
+.workspace { display:flex; flex:1; min-height:0; }
+
+/* EDITORS PANEL */
+.editors-panel { width:50%; display:flex; flex-direction:column; border-right:1px solid var(--border-md); min-height:0; }
+
+/* TABS */
+.tabs { display:flex; background:var(--surface2); border-bottom:1px solid var(--border-md); flex-shrink:0; }
+.tab { font-size:12px; font-weight:500; padding:8px 16px; cursor:pointer; color:var(--text2); border:none; background:transparent; position:relative; transition:color .1s; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--text); background:var(--surface); }
+.tab.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--accent); }
+.tab-badge { display:inline-flex; align-items:center; justify-content:center; font-size:10px; min-width:16px; height:16px; padding:0 4px; border-radius:8px; background:var(--accent-light); color:var(--accent); margin-left:4px; font-weight:600; }
+.tab-badge.err { background:var(--red-bg); color:var(--red); }
+
+/* PANE */
+.pane { display:none; flex:1; flex-direction:column; min-height:0; }
+.pane.active { display:flex; }
+.pane-toolbar { padding:6px 10px; background:var(--surface2); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:6px; flex-shrink:0; flex-wrap:wrap; }
+.pane-label { font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.05em; }
+
+/* CODEMIRROR OVERRIDES */
+.CodeMirror {
+  flex: 1;
+  height: 100%;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  background: #1e1e24;
+  color: #e8e8e4;
+}
+.CodeMirror-scroll { min-height: 0; }
+.CodeMirror-gutters { background: #1a1a20; border-right: 1px solid rgba(255,255,255,0.06); }
+.CodeMirror-linenumber { color: #555560; padding: 0 8px 0 6px; }
+.CodeMirror-cursor { border-left: 2px solid var(--accent) !important; }
+.CodeMirror-selected { background: rgba(79,142,247,0.2) !important; }
+.CodeMirror-activeline-background { background: rgba(255,255,255,0.03) !important; }
+.CodeMirror-foldgutter { width: 14px; }
+.CodeMirror-foldgutter-open, .CodeMirror-foldgutter-folded { color: var(--text3); cursor:pointer; }
+.cm-wrap { flex:1; min-height:0; display:flex; flex-direction:column; }
+
+.status-bar { padding:4px 10px; font-size:11px; border-top:1px solid var(--border); background:var(--surface2); display:flex; align-items:center; gap:6px; flex-shrink:0; color:var(--text2); }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--text3); flex-shrink:0; }
+.dot.ok { background:var(--green); }
+.dot.err { background:var(--red); }
+
+/* ERROR PANEL */
+.error-panel { flex-shrink:0; border-top:2px solid var(--red-border); background:var(--red-bg); overflow:hidden; max-height:0; transition:max-height .25s ease; }
+.error-panel.open { max-height:240px; }
+.error-header { display:flex; align-items:center; gap:8px; padding:8px 12px; cursor:pointer; user-select:none; }
+.error-header:hover { background:rgba(248,113,113,0.05); }
+.error-title { font-size:12px; font-weight:600; color:var(--red); flex:1; }
+.error-loc { font-size:11px; color:var(--red); opacity:.85; font-family:var(--mono); background:rgba(248,113,113,0.15); padding:1px 6px; border-radius:4px; }
+.error-chevron { font-size:10px; color:var(--red); transition:transform .2s; margin-left:4px; }
+.error-panel.collapsed .error-chevron { transform:rotate(-90deg); }
+.error-body { padding:8px 12px 12px; overflow-y:auto; max-height:180px; }
+.error-msg { font-family:var(--mono); font-size:11.5px; color:var(--red); white-space:pre-wrap; word-break:break-all; line-height:1.6; }
+
+/* PREVIEW PANEL */
+.preview-panel { flex:1; display:flex; flex-direction:column; min-height:0; background:var(--surface); }
+.preview-toolbar { padding:6px 12px; background:var(--surface2); border-bottom:1px solid var(--border-md); display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.preview-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text3); gap:10px; }
+.preview-empty-icon { font-size:40px; opacity:.3; }
+.preview-empty-text { font-size:13px; }
+.preview-empty-sub { font-size:11px; }
+.preview-frame-wrap { flex:1; min-height:0; position:relative; }
+#preview-frame { width:100%; height:100%; border:none; background:#fff; display:none; }
+
+/* RESIZER */
+.resizer { width:4px; background:var(--border); cursor:col-resize; flex-shrink:0; transition:background .15s; }
+.resizer:hover { background:var(--accent); }
+
+/* TOAST */
+.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:var(--radius); font-size:13px; font-weight:500; background:var(--text); color:#000; z-index:999; opacity:0; transition:opacity .2s; pointer-events:none; }
+.toast.show { opacity:1; }
+.toast.ok { background:var(--green); color:#000; }
+.toast.err { background:var(--red); color:#fff; }
+
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border-md); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">Handlebars Email Template Testing App</span>
+  <span class="badge">jknack 4.2.0</span>
+  <div class="hdr-right">
+    <span id="hdr-status">Loading...</span>
+    <button class="btn btn-sm" id="btn-sample" title="Replace the editors with the built-in sample template, payload and helpers">&#128214; Load Sample</button>
+    <button class="btn btn-sm" id="btn-save">💾 Save Files</button>
+    <button class="btn btn-primary" id="btn-render" disabled>▶ Render</button>
+  </div>
+</header>
+
+<div class="workspace">
+  <div class="editors-panel" id="editors-panel">
+
+    <div class="tabs">
+      <button class="tab active" data-tab="template">Template HTML</button>
+      <button class="tab" data-tab="payload">Payload JSON <span class="tab-badge" id="badge-payload" style="display:none"></span></button>
+      <button class="tab" data-tab="helpers">Helpers JS</button>
+    </div>
+
+    <!-- TEMPLATE PANE -->
+    <div class="pane active" id="pane-template">
+      <div class="pane-toolbar">
+        <span class="pane-label">template.html</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="tpl-chars"></span>
+      </div>
+      <div class="cm-wrap" id="cm-wrap-template"></div>
+      <div class="status-bar">
+        <div class="dot" id="tpl-dot"></div>
+        <span id="tpl-status">Loading...</span>
+      </div>
+    </div>
+
+    <!-- PAYLOAD PANE -->
+    <div class="pane" id="pane-payload">
+      <div class="pane-toolbar">
+        <span class="pane-label">payload.json</span>
+        <span id="payload-cleaned-badge" style="display:none;font-size:10px;padding:2px 7px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);border-radius:20px;font-weight:500">✓ Cleaned</span>
+        <button class="btn btn-sm" id="btn-restore-payload" style="display:none">↩ Restore Original</button>
+        <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="payload-chars"></span>
+      </div>
+      <div class="cm-wrap" id="cm-wrap-payload"></div>
+      <div class="status-bar">
+        <div class="dot" id="payload-dot"></div>
+        <span id="payload-status">Loading...</span>
+      </div>
+    </div>
+
+    <!-- HELPERS PANE -->
+    <div class="pane" id="pane-helpers">
+      <div class="pane-toolbar">
+        <span class="pane-label">customhandlebar.js</span>
+      </div>
+      <div class="cm-wrap" id="cm-wrap-helpers"></div>
+      <div class="status-bar">
+        <div class="dot" id="helpers-dot"></div>
+        <span id="helpers-status">Loading...</span>
+      </div>
+    </div>
+
+    <!-- ERROR PANEL -->
+    <div class="error-panel" id="error-panel">
+      <div class="error-header" id="error-header">
+        <span style="font-size:13px">⚠️</span>
+        <span class="error-title">Render Error</span>
+        <span class="error-loc" id="error-loc" style="display:none"></span>
+        <span class="error-chevron">▼</span>
+      </div>
+      <div class="error-body">
+        <pre class="error-msg" id="error-msg"></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="resizer" id="resizer"></div>
+
+  <!-- PREVIEW PANEL -->
+  <div class="preview-panel">
+    <div class="preview-toolbar">
+      <span style="font-size:12px;font-weight:600;color:var(--text2)">Preview</span>
+      <span id="render-status" style="font-size:11px;color:var(--text3);margin-left:4px"></span>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button class="btn btn-sm" id="btn-open-tab" style="display:none">↗ Open in New Tab</button>
+      </div>
+    </div>
+    <div class="preview-frame-wrap">
+      <div class="preview-empty" id="preview-empty">
+        <div class="preview-empty-icon">🖥️</div>
+        <div class="preview-empty-text">Click Render to preview the template output</div>
+        <div class="preview-empty-sub" style="color:var(--text3)">Ctrl+Enter to render</div>
+      </div>
+      <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let originalPayload  = null;
+let isShowingCleaned = false;
+let lastRenderedHtml = null;
+
+// ── CodeMirror instances ────────────────────────────────────────────────────
+const cmOptions = (mode, extra = {}) => ({
+  mode,
+  theme: 'material-darker',
+  lineNumbers: true,
+  lineWrapping: true,
+  indentUnit: 4,
+  tabSize: 4,
+  indentWithTabs: false,
+  electricChars: true,
+  matchBrackets: true,
+  autoCloseBrackets: true,
+  styleActiveLine: true,
+  foldGutter: true,
+  gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+  extraKeys: {
+    'Tab': cm => cm.execCommand('insertSoftTab'),
+    'Ctrl-Enter': () => { if (!$('btn-render').disabled) doRender(); },
+    'Cmd-Enter':  () => { if (!$('btn-render').disabled) doRender(); },
+  },
+  ...extra
+});
+
+const cmTemplate = CodeMirror($('cm-wrap-template'), cmOptions('htmlmixed'));
+const cmPayload  = CodeMirror($('cm-wrap-payload'),  cmOptions({ name: 'javascript', json: true }));
+const cmHelpers  = CodeMirror($('cm-wrap-helpers'),  cmOptions('javascript'));
+
+// Force editors to fill their containers
+[cmTemplate, cmPayload, cmHelpers].forEach(cm => {
+  cm.getWrapperElement().style.cssText = 'flex:1;min-height:0;overflow:hidden;';
+});
+
+// ── Tabs ────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    $('pane-' + tab.dataset.tab).classList.add('active');
+    // Refresh the now-visible editor so it renders correctly
+    const editors = { template: cmTemplate, payload: cmPayload, helpers: cmHelpers };
+    setTimeout(() => editors[tab.dataset.tab].refresh(), 10);
+  });
+});
+
+// ── Resize ──────────────────────────────────────────────────────────────────
+(function(){
+  const resizer=$('resizer'), panel=$('editors-panel');
+  let drag=false, sx=0, sw=0;
+  resizer.addEventListener('mousedown', e => {
+    drag=true; sx=e.clientX; sw=panel.offsetWidth;
+    document.body.style.userSelect='none'; document.body.style.cursor='col-resize';
+  });
+  document.addEventListener('mousemove', e => {
+    if (!drag) return;
+    panel.style.width = Math.max(320, Math.min(sw+e.clientX-sx, window.innerWidth-320)) + 'px';
+    cmTemplate.refresh(); cmPayload.refresh(); cmHelpers.refresh();
+  });
+  document.addEventListener('mouseup', () => {
+    drag=false; document.body.style.userSelect=''; document.body.style.cursor='';
+  });
+})();
+
+// ── Error panel ─────────────────────────────────────────────────────────────
+$('error-header').addEventListener('click', () => $('error-panel').classList.toggle('collapsed'));
+
+function showError(message, line, column, source) {
+  $('error-msg').textContent = message || 'Unknown error';
+  const hasLoc = line > 0;
+  const locText = hasLoc ? 'Line ' + line + (column > 0 ? '  Col ' + column : '') : '';
+  const locEl = $('error-loc');
+  if (hasLoc) { locEl.textContent = locText; locEl.style.display = ''; }
+  else { locEl.style.display = 'none'; }
+  $('error-panel').classList.add('open');
+  $('error-panel').classList.remove('collapsed');
+  const label = source === 'payload' ? 'Payload JSON' : 'Template';
+  $('render-status').textContent = '\u2717 ' + label + ' error' + (hasLoc ? ' \u00b7 ' + locText : '');
+  $('render-status').style.color = 'var(--red)';
+  const tab = source === 'payload' ? 'payload' : 'template';
+  document.querySelector('.tab[data-tab="' + tab + '"]').click();
+  if (hasLoc) {
+    const cm = tab === 'payload' ? cmPayload : cmTemplate;
+    setTimeout(() => {
+      cm.refresh();
+      cm.setCursor({ line: Math.min(line, cm.lineCount()) - 1, ch: Math.max((column || 1) - 1, 0) });
+      cm.focus();
+    }, 30);
+  }
+}
+
+function clearError() {
+  $('error-panel').classList.remove('open');
+  $('error-msg').textContent = '';
+  $('error-loc').textContent = '';
+}
+
+// ── Load files ───────────────────────────────────────────────────────────────
+async function loadFiles() {
+  setHdrStatus('loading', 'Loading files...');
+  try {
+    const data = await (await fetch('/api/load')).json();
+    cmTemplate.setValue(data.template || '');
+    cmPayload.setValue(data.payload   || '{}');
+    cmHelpers.setValue(data.helpers   || '');
+    originalPayload = cmPayload.getValue();
+    updateTplStatus(); updatePayloadStatus(); updateHelpersStatus(); updateRenderBtn();
+    setHdrStatus('ok', 'Files loaded');
+  } catch(e) { setHdrStatus('err', 'Load failed: ' + e.message); }
+}
+
+// ── Load sample ──────────────────────────────────────────────────────────────
+$('btn-sample').addEventListener('click', async () => {
+  if (!confirm('Replace the current template, payload and helpers with the built-in sample?\n(Nothing is written to disk until you click Save Files.)')) return;
+  try {
+    const data = await (await fetch('/api/sample')).json();
+    cmTemplate.setValue(data.template || '');
+    cmPayload.setValue(data.payload   || '{}');
+    cmHelpers.setValue(data.helpers   || '');
+    isShowingCleaned = false;
+    $('payload-cleaned-badge').style.display = 'none';
+    $('btn-restore-payload').style.display = 'none';
+    originalPayload = cmPayload.getValue();
+    clearError();
+    updateTplStatus(); updatePayloadStatus(); updateHelpersStatus(); updateRenderBtn();
+    showToast('Sample loaded', 'ok');
+  } catch(e) { showToast('Could not load sample: ' + e.message, 'err'); }
+});
+
+// ── Save ─────────────────────────────────────────────────────────────────────
+$('btn-save').addEventListener('click', async () => {
+  $('btn-save').disabled = true; $('btn-save').textContent = 'Saving...';
+  const payloadToSave = isShowingCleaned ? originalPayload : cmPayload.getValue();
+  try {
+    const data = await (await fetch('/api/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ template: cmTemplate.getValue(), payload: payloadToSave, helpers: cmHelpers.getValue() })
+    })).json();
+    data.status === 'saved' ? showToast('✓ All files saved', 'ok') : showToast('Save failed: ' + (data.message||'error'), 'err');
+  } catch(e) { showToast('Save failed: ' + e.message, 'err'); }
+  finally { $('btn-save').disabled = false; $('btn-save').textContent = '💾 Save Files'; }
+});
+
+// ── Restore original payload ─────────────────────────────────────────────────
+$('btn-restore-payload').addEventListener('click', () => {
+  if (originalPayload !== null) {
+    cmPayload.setValue(originalPayload);
+    isShowingCleaned = false;
+    $('payload-cleaned-badge').style.display = 'none';
+    $('btn-restore-payload').style.display = 'none';
+    updatePayloadStatus();
+  }
+});
+
+// ── Render ───────────────────────────────────────────────────────────────────
+$('btn-render').addEventListener('click', doRender);
+
+async function doRender() {
+  $('btn-render').disabled = true; $('btn-render').textContent = '⏳ Rendering...';
+  clearError();
+  $('render-status').textContent = 'Rendering...'; $('render-status').style.color = 'var(--text3)';
+
+  const payloadToSend = isShowingCleaned ? originalPayload : cmPayload.getValue();
+
+  try {
+    const res  = await fetch('/api/render', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ template: cmTemplate.getValue(), payload: payloadToSend, helpers: cmHelpers.getValue() })
+    });
+    const data = await res.json();
+
+    // Update payload editor with cleaned version
+    if (data.cleanedPayload) {
+      if (!isShowingCleaned) originalPayload = payloadToSend;
+      cmPayload.setValue(data.cleanedPayload);
+      isShowingCleaned = true;
+      $('payload-cleaned-badge').style.display = '';
+      $('btn-restore-payload').style.display = '';
+      updatePayloadStatus();
+    }
+
+    if (data.success) {
+      lastRenderedHtml = data.html;
+
+      // Show rendered output in the inline preview iframe
+      const frame = $('preview-frame');
+      frame.style.display = 'block';
+      $('preview-empty').style.display = 'none';
+      $('btn-open-tab').style.display = '';
+
+      // Write into iframe using srcdoc for isolation
+      frame.srcdoc = data.html;
+
+      $('render-status').textContent = '✓ Rendered ' + new Date().toLocaleTimeString();
+      $('render-status').style.color = 'var(--green)';
+    } else {
+      showError(data.errorMessage, data.errorLine, data.errorColumn, data.errorSource);
+    }
+  } catch(e) { showError('Network error: ' + e.message, -1, -1); }
+  finally { $('btn-render').disabled = false; $('btn-render').textContent = '▶ Render'; updateRenderBtn(); }
+}
+
+// ── Open in new tab ──────────────────────────────────────────────────────────
+$('btn-open-tab').addEventListener('click', () => {
+  if (!lastRenderedHtml) return;
+  const w = window.open('', '_blank');
+  w.document.open(); w.document.write(lastRenderedHtml); w.document.close();
+});
+
+// ── Editor change listeners ──────────────────────────────────────────────────
+cmTemplate.on('change', () => { updateTplStatus(); updateRenderBtn(); });
+cmPayload.on('change', () => {
+  if (isShowingCleaned) {
+    isShowingCleaned = false;
+    $('payload-cleaned-badge').style.display = 'none';
+    $('btn-restore-payload').style.display = 'none';
+  }
+  originalPayload = cmPayload.getValue();
+  updatePayloadStatus(); updateRenderBtn();
+});
+cmHelpers.on('change', () => updateHelpersStatus());
+
+// ── Status ───────────────────────────────────────────────────────────────────
+function updateTplStatus() {
+  const len = cmTemplate.getValue().length;
+  if (!len) { setDot('tpl','none'); $('tpl-status').textContent='Empty'; $('tpl-chars').textContent=''; }
+  else { setDot('tpl','ok'); $('tpl-status').textContent='Ready'; $('tpl-chars').textContent=len.toLocaleString()+' chars'; }
+}
+
+// Mirrors the server-side cleaner: strips // and /* */ comments and trailing commas,
+// but never touches anything inside a string (so URLs like https://... are safe).
+function cleanJsonText(src) {
+  let out = '', i = 0, inStr = false;
+  while (i < src.length) {
+    const c = src[i];
+    if (inStr) {
+      out += c;
+      if (c === '\\' && i + 1 < src.length) { out += src[i + 1]; i += 2; continue; }
+      if (c === '"') inStr = false;
+      i++; continue;
+    }
+    if (c === '"') { inStr = true; out += c; i++; continue; }
+    if (c === '/' && src[i + 1] === '/') { while (i < src.length && src[i] !== '\n') i++; continue; }
+    if (c === '/' && src[i + 1] === '*') {
+      i += 2;
+      while (i + 1 < src.length && !(src[i] === '*' && src[i + 1] === '/')) { if (src[i] === '\n') out += '\n'; i++; }
+      i += 2; continue;
+    }
+    if (c === ',') {
+      let j = i + 1;
+      while (j < src.length && /\s/.test(src[j])) j++;
+      if (src[j] === '}' || src[j] === ']') { i++; continue; }
+    }
+    out += c; i++;
+  }
+  return out;
+}
+
+function updatePayloadStatus() {
+  const val = cmPayload.getValue().trim();
+  $('payload-chars').textContent = val.length ? val.length.toLocaleString()+' chars' : '';
+  if (!val) { setDot('payload','none'); $('payload-status').textContent='Empty'; $('badge-payload').style.display='none'; return; }
+  try {
+    JSON.parse(cleanJsonText(val));
+    setDot('payload','ok');
+    $('payload-status').textContent = isShowingCleaned ? 'Cleaned & ready' : 'Valid JSON';
+    const b=$('badge-payload'); b.style.display=''; b.textContent='\u2713'; b.className='tab-badge';
+  } catch(e) {
+    setDot('payload','err');
+    $('payload-status').textContent = 'JSON Error: ' + e.message.split('\n')[0];
+    const b=$('badge-payload'); b.style.display=''; b.textContent='!'; b.className='tab-badge err';
+  }
+}
+
+function updateHelpersStatus() {
+  const v = cmHelpers.getValue().trim();
+  setDot('helpers', v?'ok':'none'); $('helpers-status').textContent = v?'Helpers loaded':'No helpers';
+}
+
+function updateRenderBtn() {
+  $('btn-render').disabled = !(cmTemplate.getValue().trim() && cmPayload.getValue().trim());
+}
+
+function setDot(w,s) { $(w+'-dot').className = 'dot'+(s==='ok'?' ok':s==='err'?' err':''); }
+function setHdrStatus(s,m) { $('hdr-status').textContent=m; $('hdr-status').className=s; }
+function showToast(m,t='') { const el=$('toast'); el.textContent=m; el.className='toast show '+t; setTimeout(()=>{el.className='toast';},3000); }
+
+loadFiles();
+</script>
+</body>
+</html>

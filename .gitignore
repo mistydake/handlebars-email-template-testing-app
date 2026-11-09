@@ -1,0 +1,25 @@
+# Build output
+target/
+*.jar
+!.mvn/wrapper/*.jar
+
+# Files the app writes when you click "Save Files" and run it from this folder
+/template.html
+/payload.json
+/customhandlebar.js
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

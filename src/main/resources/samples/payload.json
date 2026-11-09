@@ -1,0 +1,25 @@
+// Sample payload (flat format). Comments and trailing commas are cleaned before parsing.
+// Note: "items" and "notes" below are stored as JSON *strings*. The app
+// expands stringified arrays/objects when you render, so the template sees real arrays.
+{
+    "orderId": "ORD-10482",
+    "placedAt": "2026-03-14",
+    "status": "shipped",   // try changing to "processing"
+    "currency": "USD",
+    "taxRate": 0.08,
+    "customer": {
+        "name": "Jordan Rivera",
+        "email": "jordan.rivera@example.com"
+    },
+    "shipping": {
+        "method": "Standard (3-5 days)",
+        "address": {
+            "line1": "742 Evergreen Terrace",
+            "city": "Springfield",
+            "region": "OR",
+            "postal": "97477"
+        }
+    },
+    "items": "[{\"sku\":\"KB-204\",\"name\":\"Mechanical keyboard\",\"price\":89.5,\"quantity\":1},{\"sku\":\"MS-110\",\"name\":\"Wireless mouse\",\"price\":34,\"quantity\":2},{\"sku\":\"HD-330\",\"name\":\"USB-C hub\",\"price\":45.99,\"quantity\":1},{\"sku\":\"CB-009\",\"name\":\"Braided cable (2 m)\",\"price\":12,\"quantity\":3}]",
+    "notes": "[\"Gift wrap requested\",\"Leave at front desk\"]",
+}
